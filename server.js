@@ -69,32 +69,27 @@ app.post('/todos', function(req, res) {
   }).catch(function (e) {
     res.status(400).json(e);
   });
-  // if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-  //   return res.status(400).send();
-  // }
-
-  // body.description = body.description.trim();
-  // body.id = todoNextId++;
-
-  // todos.push(body);
-  // res.json(body);
 });
 
 // DELETE /todos/:id
 app.delete('/todos/:id', function(req, res) {
   var todoId = parseInt(req.params.id, 10);
-  var matchedTodo = _.findWhere(todos, {
-    id: todoId
+  
+  db.todo.destroy({
+    where: {
+      id: todoId
+    }
+  }).then(function(rowsDeleted) {
+    if (rowsDeleted === 0) {
+      res.status(404).send({
+        "error": "No todo found with that id"
+      });
+    } else {
+      res.status(204).send();
+    }
+  }).catch(function (e) {
+    res.status(500).send();
   });
-
-  if (matchedTodo) {
-    todos = _.without(todos, matchedTodo);
-    res.json(matchedTodo);
-  } else {
-    res.status(404).send({
-      "error": "No todo found with that id"
-    });
-  }
 });
 
 // PUT /todos/:id
